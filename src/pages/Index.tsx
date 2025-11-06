@@ -1,6 +1,4 @@
 import { MadeWithDyad } from "@/components/made-with-dyad";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 
 const Index = () => {
   return (
@@ -8,13 +6,8 @@ const Index = () => {
       <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
         <h1 className="text-4xl font-bold mb-4">Benvenuto nell'App di Prenotazione Sale Riunioni</h1>
         <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
-          Inizia a gestire le tue prenotazioni qui!
+          Usa la barra di navigazione per esplorare le sale e le tue prenotazioni.
         </p>
-        <Link to="/rooms">
-          <Button size="lg" className="text-lg px-8 py-4">
-            Visualizza Sale Riunioni
-          </Button>
-        </Link>
       </div>
       <MadeWithDyad />
     </div>

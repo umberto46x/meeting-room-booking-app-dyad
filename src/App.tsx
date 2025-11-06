@@ -8,7 +8,9 @@ import NotFound from "./pages/NotFound";
 import RoomsPage from "./pages/RoomsPage";
 import RoomDetailsPage from "./pages/RoomDetailsPage";
 import BookingFormPage from "./pages/BookingFormPage";
-import EditBookingPage from "./pages/EditBookingPage"; // Import the new EditBookingPage
+import EditBookingPage from "./pages/EditBookingPage";
+import MyBookingsPage from "./pages/MyBookingsPage"; // Import the new MyBookingsPage
+import Navbar from "./components/Navbar"; // Import the Navbar component
 
 const queryClient = new QueryClient();
 
@@ -18,12 +20,14 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <Navbar /> {/* Render the Navbar here */}
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/rooms" element={<RoomsPage />} />
           <Route path="/rooms/:id" element={<RoomDetailsPage />} />
           <Route path="/rooms/:id/book" element={<BookingFormPage />} />
-          <Route path="/rooms/:roomId/bookings/:bookingId/edit" element={<EditBookingPage />} /> {/* New route for EditBookingPage */}
+          <Route path="/rooms/:roomId/bookings/:bookingId/edit" element={<EditBookingPage />} />
+          <Route path="/my-bookings" element={<MyBookingsPage />} /> {/* New route for MyBookingsPage */}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

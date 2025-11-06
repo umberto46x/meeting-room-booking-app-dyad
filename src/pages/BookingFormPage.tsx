@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { mockRooms, addBooking, mockBookings } from "@/data/mockData"; // Import mockBookings
+import { mockRooms, addBooking, mockBookings } from "@/data/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CalendarIcon } from "lucide-react";
@@ -17,80 +17,82 @@ import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { showSuccess, showError } from "@/utils/toast";
 
-const bookingFormSchema = z.object({
-  title: z.string().min(2, { message: "Il titolo deve contenere almeno 2 caratteri." }),
-  organizer: z.string().min(2, { message: "Il nome dell'organizzatore deve contenere almeno 2 caratteri." }),
-  date: z.date({ required_error: "Seleziona una data per la prenotazione." }),
-  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, { message: "Formato ora non valido (HH:MM)." }),
-  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, { message: "Formato ora non valido (HH:MM)." }),
-}).refine((data) => {
-  const start = new Date(data.date);
-  const [startHour, startMinute] = data.startTime.split(':').map(Number);
-  start.setHours(startHour, startMinute, 0, 0);
-
-  const end = new Date(data.date);
-  const [endHour, endMinute] = data.endTime.split(':').map(Number);
-  end.setHours(endHour, endMinute, 0, 0);
-
-  return end > start;
-}, {
-  message: "L'ora di fine deve essere successiva all'ora di inizio.",
-  path: ["endTime"],
-}).refine((data) => {
-  // Check for booking overlaps
-  const { date, startTime, endTime } = data;
-  const { id: roomId } = useParams<{ id: string }>(); // Get roomId from params
-
-  if (!roomId) return true; // Should not happen if room is found
-
-  const newBookingStart = new Date(date);
-  const [newStartHour, newStartMinute] = startTime.split(':').map(Number);
-  newBookingStart.setHours(newStartHour, newStartMinute, 0, 0);
-
-  const newBookingEnd = new Date(date);
-  const [newEndHour, newEndMinute] = endTime.split(':').map(Number);
-  newBookingEnd.setHours(newEndHour, newEndMinute, 0, 0);
-
-  // Filter existing bookings for the same room and date
-  const existingBookingsForRoomAndDate = mockBookings.filter(
-    (booking) =>
-      booking.roomId === roomId &&
-      format(booking.startTime, "yyyy-MM-dd") === format(date, "yyyy-MM-dd")
-  );
-
-  // Check for overlaps
-  const hasOverlap = existingBookingsForRoomAndDate.some((existingBooking) => {
-    const existingStart = existingBooking.startTime;
-    const existingEnd = existingBooking.endTime;
-
-    // Overlap conditions:
-    // 1. New booking starts during an existing booking
-    // 2. New booking ends during an existing booking
-    // 3. Existing booking starts during the new booking (new booking fully contains existing)
-    return (
-      (newBookingStart < existingEnd && newBookingEnd > existingStart)
-    );
-  });
-
-  return !hasOverlap;
-}, {
-  message: "La sala è già prenotata per questo intervallo di tempo.",
-  path: ["startTime"], // Attach error to startTime field
-});
-
-type BookingFormValues = z.infer<typeof bookingFormSchema>;
+// Definizione manuale del tipo per i valori del form, poiché lo schema è dinamico
+interface BookingFormValues {
+  title: string;
+  organizer: string;
+  date: Date;
+  startTime: string;
+  endTime: string;
+}
 
 const BookingFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const room = mockRooms.find((r) => r.id === id);
+  const roomId = id || ''; // Assicurati che roomId sia sempre una stringa
+
+  // Sposta la definizione dello schema Zod all'interno del componente
+  const bookingFormSchema = z.object({
+    title: z.string().min(2, { message: "Il titolo deve contenere almeno 2 caratteri." }),
+    organizer: z.string().min(2, { message: "Il nome dell'organizzatore deve contenere almeno 2 caratteri." }),
+    date: z.date({ required_error: "Seleziona una data per la prenotazione." }),
+    startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, { message: "Formato ora non valido (HH:MM)." }),
+    endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, { message: "Formato ora non valido (HH:MM)." }),
+  }).refine((data) => {
+    const start = new Date(data.date);
+    const [startHour, startMinute] = data.startTime.split(':').map(Number);
+    start.setHours(startHour, startMinute, 0, 0);
+
+    const end = new Date(data.date);
+    const [endHour, endMinute] = data.endTime.split(':').map(Number);
+    end.setHours(endHour, endMinute, 0, 0);
+
+    return end > start;
+  }, {
+    message: "L'ora di fine deve essere successiva all'ora di inizio.",
+    path: ["endTime"],
+  }).refine((data) => {
+    // Check for booking overlaps
+    const { date, startTime, endTime } = data;
+
+    const newBookingStart = new Date(date);
+    const [newStartHour, newStartMinute] = startTime.split(':').map(Number);
+    newBookingStart.setHours(newStartHour, newStartMinute, 0, 0);
+
+    const newBookingEnd = new Date(date);
+    const [newEndHour, newEndMinute] = endTime.split(':').map(Number);
+    newBookingEnd.setHours(newEndHour, newEndMinute, 0, 0);
+
+    // Filter existing bookings for the same room and date
+    const existingBookingsForRoomAndDate = mockBookings.filter(
+      (booking) =>
+        booking.roomId === roomId && // Usa roomId direttamente dallo scope del componente
+        format(booking.startTime, "yyyy-MM-dd") === format(date, "yyyy-MM-dd")
+    );
+
+    // Check for overlaps
+    const hasOverlap = existingBookingsForRoomAndDate.some((existingBooking) => {
+      const existingStart = existingBooking.startTime;
+      const existingEnd = existingBooking.endTime;
+
+      return (
+        (newBookingStart < existingEnd && newBookingEnd > existingStart)
+      );
+    });
+
+    return !hasOverlap;
+  }, {
+    message: "La sala è già prenotata per questo intervallo di tempo.",
+    path: ["startTime"],
+  });
 
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
     defaultValues: {
       title: "",
       organizer: "",
-      date: new Date(), // Default to today
+      date: new Date(),
       startTime: "09:00",
       endTime: "10:00",
     },
@@ -122,7 +124,7 @@ const BookingFormPage: React.FC = () => {
       endTime.setHours(endHour, endMinute, 0, 0);
 
       const newBooking = {
-        id: `booking-${Date.now()}`, // Simple unique ID
+        id: `booking-${Date.now()}`,
         roomId: room.id,
         title: values.title,
         startTime,
@@ -208,7 +210,7 @@ const BookingFormPage: React.FC = () => {
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          disabled={(date) => date < new Date()} // Disable past dates
+                          disabled={(date) => date < new Date()}
                           initialFocus
                           locale={it}
                         />

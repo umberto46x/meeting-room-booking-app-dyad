@@ -7,16 +7,17 @@ import { ArrowLeft, CalendarIcon } from "lucide-react";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod"; {/* Correzione qui: da '*s z' a '* as z' */}
+import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
+import { cn, generateTimeSlots } from "@/lib/utils"; // Import generateTimeSlots
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { showSuccess, showError } from "@/utils/toast";
 import { Booking } from "@/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Select components
 
 // Definizione manuale del tipo per i valori del form
 interface BookingFormValues {
@@ -87,6 +88,7 @@ const EditBookingPage: React.FC = () => {
   const bookingToEdit = mockBookings.find((b) => b.id === bookingId && b.roomId === roomId);
 
   const bookingFormSchema = createBookingFormSchema(roomId || '', bookingId, mockBookings);
+  const timeSlots = generateTimeSlots(); // Genera gli slot orari
 
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
@@ -243,9 +245,20 @@ const EditBookingPage: React.FC = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Ora di Inizio</FormLabel>
-                      <FormControl>
-                        <Input type="time" {...field} />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleziona ora di inizio" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {timeSlots.map((slot) => (
+                            <SelectItem key={slot} value={slot}>
+                              {slot}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -256,9 +269,20 @@ const EditBookingPage: React.FC = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Ora di Fine</FormLabel>
-                      <FormControl>
-                        <Input type="time" {...field} />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleziona ora di fine" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {timeSlots.map((slot) => (
+                            <SelectItem key={slot} value={slot}>
+                              {slot}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

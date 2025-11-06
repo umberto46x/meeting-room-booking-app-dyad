@@ -12,10 +12,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
+import { cn, generateTimeSlots } from "@/lib/utils"; // Import generateTimeSlots
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { showSuccess, showError } from "@/utils/toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Select components
 
 // Definizione manuale del tipo per i valori del form, poiché lo schema è dinamico
 interface BookingFormValues {
@@ -31,6 +32,8 @@ const BookingFormPage: React.FC = () => {
   const navigate = useNavigate();
   const room = mockRooms.find((r) => r.id === id);
   const roomId = id || ''; // Assicurati che roomId sia sempre una stringa
+
+  const timeSlots = generateTimeSlots(); // Genera gli slot orari
 
   // Sposta la definizione dello schema Zod all'interno del componente
   const bookingFormSchema = z.object({
@@ -231,9 +234,20 @@ const BookingFormPage: React.FC = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Ora di Inizio</FormLabel>
-                      <FormControl>
-                        <Input type="time" {...field} />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleziona ora di inizio" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {timeSlots.map((slot) => (
+                            <SelectItem key={slot} value={slot}>
+                              {slot}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -244,9 +258,20 @@ const BookingFormPage: React.FC = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Ora di Fine</FormLabel>
-                      <FormControl>
-                        <Input type="time" {...field} />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleziona ora di fine" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {timeSlots.map((slot) => (
+                            <SelectItem key={slot} value={slot}>
+                              {slot}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

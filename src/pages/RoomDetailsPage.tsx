@@ -1,14 +1,16 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
-import { mockRooms } from "@/data/mockData";
+import { mockRooms, mockBookings } from "@/data/mockData";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, MapPin, ArrowLeft } from "lucide-react";
 import { MadeWithDyad } from "@/components/made-with-dyad";
+import BookingCard from "@/components/BookingCard"; // Import the new BookingCard component
 
 const RoomDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const room = mockRooms.find((r) => r.id === id);
+  const roomBookings = mockBookings.filter((booking) => booking.roomId === id);
 
   if (!room) {
     return (
@@ -46,8 +48,15 @@ const RoomDetailsPage: React.FC = () => {
           </div>
 
           <h2 className="text-2xl font-semibold mt-6 mb-4">Prossime Prenotazioni</h2>
-          <p className="text-muted-foreground">Nessuna prenotazione per questa stanza al momento. (Funzionalità di prenotazione in arrivo!)</p>
-          {/* Qui verranno visualizzate le prenotazioni future */}
+          {roomBookings.length > 0 ? (
+            <div className="space-y-4">
+              {roomBookings.map((booking) => (
+                <BookingCard key={booking.id} booking={booking} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-muted-foreground">Nessuna prenotazione per questa stanza al momento.</p>
+          )}
           
           <Button className="w-full mt-6">Prenota questa Stanza</Button>
         </CardContent>

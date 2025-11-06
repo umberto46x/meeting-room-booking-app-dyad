@@ -7,7 +7,7 @@ import { ArrowLeft, CalendarIcon } from "lucide-react";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import *s z from "zod";
+import * as z from "zod"; {/* Correzione qui: da '*s z' a '* as z' */}
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";

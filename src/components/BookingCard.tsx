@@ -2,7 +2,7 @@ import React from "react";
 import { Booking } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, User, Trash2 } from "lucide-react";
+import { Calendar, Clock, User, Trash2, Edit } from "lucide-react"; // Import Edit icon
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import {
@@ -17,6 +17,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { showSuccess, showError } from "@/utils/toast";
+import { Link } from "react-router-dom"; // Import Link
 
 interface BookingCardProps {
   booking: Booking;
@@ -54,25 +55,32 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onDelete }) => {
           <User className="h-4 w-4" />
           <span>Organizzatore: {booking.organizer}</span>
         </div>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm" className="mt-2 w-full">
-              <Trash2 className="mr-2 h-4 w-4" /> Elimina Prenotazione
+        <div className="flex gap-2 mt-2">
+          <Link to={`/rooms/${booking.roomId}/bookings/${booking.id}/edit`} className="flex-1">
+            <Button variant="outline" size="sm" className="w-full">
+              <Edit className="mr-2 h-4 w-4" /> Modifica
             </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Sei assolutamente sicuro?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Questa azione non può essere annullata. Verrà eliminata permanentemente la prenotazione di "{booking.title}".
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Annulla</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete}>Elimina</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+          </Link>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm" className="flex-1">
+                <Trash2 className="mr-2 h-4 w-4" /> Elimina
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Sei assolutamente sicuro?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Questa azione non può essere annullata. Verrà eliminata permanentemente la prenotazione di "{booking.title}".
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Annulla</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete}>Elimina</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </CardContent>
     </Card>
   );

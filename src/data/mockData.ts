@@ -68,11 +68,17 @@ export let mockBookings: Booking[] = [
 
 export const addBooking = (newBooking: Booking) => {
   mockBookings = [...mockBookings, newBooking];
-  // In un'applicazione reale, qui si farebbe una chiamata API per salvare la prenotazione
   console.log("Nuova prenotazione aggiunta:", newBooking);
 };
 
 export const deleteBooking = (bookingId: string) => {
   mockBookings = mockBookings.filter(booking => booking.id !== bookingId);
   console.log("Prenotazione eliminata:", bookingId);
+};
+
+export const updateBooking = (updatedBooking: Booking) => {
+  mockBookings = mockBookings.map(booking =>
+    booking.id === updatedBooking.id ? updatedBooking : booking
+  );
+  console.log("Prenotazione aggiornata:", updatedBooking);
 };

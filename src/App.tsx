@@ -7,7 +7,8 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import RoomsPage from "./pages/RoomsPage";
 import RoomDetailsPage from "./pages/RoomDetailsPage";
-import BookingFormPage from "./pages/BookingFormPage"; // Import the new BookingFormPage
+import BookingFormPage from "./pages/BookingFormPage";
+import EditBookingPage from "./pages/EditBookingPage"; // Import the new EditBookingPage
 
 const queryClient = new QueryClient();
 
@@ -21,7 +22,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/rooms" element={<RoomsPage />} />
           <Route path="/rooms/:id" element={<RoomDetailsPage />} />
-          <Route path="/rooms/:id/book" element={<BookingFormPage />} /> {/* New route for BookingFormPage */}
+          <Route path="/rooms/:id/book" element={<BookingFormPage />} />
+          <Route path="/rooms/:roomId/bookings/:bookingId/edit" element={<EditBookingPage />} /> {/* New route for EditBookingPage */}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

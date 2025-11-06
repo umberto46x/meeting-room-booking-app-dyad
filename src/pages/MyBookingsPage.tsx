@@ -1,22 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { mockBookings, deleteBooking } from "@/data/mockData"; // Import deleteBooking directly
+import { mockBookings, deleteBooking } from "@/data/mockData";
 import { Booking } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import BookingCard from "@/components/BookingCard";
 import { MadeWithDyad } from "@/components/made-with-dyad";
-import { Search } from "lucide-react";
+import { Search, CalendarIcon } from "lucide-react";
 import { showSuccess, showError } from "@/utils/toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { format } from "date-fns";
+import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { DateRange } from "react-day-picker";
+import { it } from "date-fns/locale";
 
 const MyBookingsPage: React.FC = () => {
   const [organizerFilter, setOrganizerFilter] = useState<string>("");
-  const [sortBy, setSortBy] = useState<string>("dateAsc"); // Default sort by date ascending
+  const [sortBy, setSortBy] = useState<string>("dateAsc");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [filteredAndSortedBookings, setFilteredAndSortedBookings] = useState<Booking[]>([]);
 
   useEffect(() => {
-    let currentBookings = [...mockBookings]; // Start with all bookings
+    let currentBookings = [...mockBookings];
 
     // 1. Filter by organizer
     if (organizerFilter) {
@@ -25,7 +31,23 @@ const MyBookingsPage: React.FC = () => {
       );
     }
 
-    // 2. Sort bookings
+    // 2. Filter by date range
+    if (dateRange?.from) {
+      currentBookings = currentBookings.filter((booking) => {
+        const bookingDate = booking.startTime;
+        const from = dateRange.from ? startOfDay(dateRange.from) : null;
+        const to = dateRange.to ? endOfDay(dateRange.to) : null;
+
+        if (from && to) {
+          return isWithinInterval(bookingDate, { start: from, end: to });
+        } else if (from) {
+          return bookingDate >= from;
+        }
+        return true;
+      });
+    }
+
+    // 3. Sort bookings
     currentBookings.sort((a, b) => {
       if (sortBy === "dateAsc") {
         return a.startTime.getTime() - b.startTime.getTime();
@@ -34,23 +56,20 @@ const MyBookingsPage: React.FC = () => {
         return b.startTime.getTime() - a.startTime.getTime();
       }
       if (sortBy === "roomNameAsc") {
-        // Assuming room name can be derived or is available. For now, let's use title as a proxy.
-        // In a real app, you'd fetch room details or have room name in booking.
-        return a.title.localeCompare(b.title);
+        return a.title.localeCompare(b.title); // Using title as a proxy for room name
       }
       if (sortBy === "roomNameDesc") {
-        return b.title.localeCompare(a.title);
+        return b.title.localeCompare(a.title); // Using title as a proxy for room name
       }
       return 0;
     });
 
     setFilteredAndSortedBookings(currentBookings);
-  }, [organizerFilter, sortBy, mockBookings]); // Depend on mockBookings to react to global changes
+  }, [organizerFilter, sortBy, dateRange, mockBookings]);
 
   const handleDeleteBooking = (bookingId: string) => {
     try {
-      deleteBooking(bookingId); // Update the global mockBookings array
-      // Re-trigger useEffect to re-filter and re-sort
+      deleteBooking(bookingId);
       setFilteredAndSortedBookings((prevBookings) => prevBookings.filter((booking) => booking.id !== bookingId));
       showSuccess("Prenotazione eliminata con successo!");
     } catch (error) {
@@ -59,10 +78,14 @@ const MyBookingsPage: React.FC = () => {
     }
   };
 
+  const handleClearDateFilter = () => {
+    setDateRange(undefined);
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-4xl font-bold text-center mb-8">Le mie Prenotazioni</h1>
-      <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-6 max-w-2xl mx-auto">
+      <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-6 max-w-3xl mx-auto">
         <div className="relative flex-1 w-full">
           <Input
             type="text"
@@ -73,6 +96,43 @@ const MyBookingsPage: React.FC = () => {
           />
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              id="date"
+              variant={"outline"}
+              className={cn(
+                "w-full sm:w-[300px] justify-start text-left font-normal",
+                !dateRange && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {dateRange?.from ? (
+                dateRange.to ? (
+                  <>
+                    {format(dateRange.from, "LLL dd, y", { locale: it })} -{" "}
+                    {format(dateRange.to, "LLL dd, y", { locale: it })}
+                  </>
+                ) : (
+                  format(dateRange.from, "LLL dd, y", { locale: it })
+                )
+              ) : (
+                <span>Seleziona un intervallo di date</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              initialFocus
+              mode="range"
+              defaultMonth={dateRange?.from}
+              selected={dateRange}
+              onSelect={setDateRange}
+              numberOfMonths={2}
+              locale={it}
+            />
+          </PopoverContent>
+        </Popover>
         <Select onValueChange={setSortBy} defaultValue={sortBy}>
           <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Ordina per..." />
@@ -84,8 +144,8 @@ const MyBookingsPage: React.FC = () => {
             <SelectItem value="roomNameDesc">Nome Sala (Z-A)</SelectItem>
           </SelectContent>
         </Select>
-        <Button onClick={() => setOrganizerFilter("")} variant="outline" className="w-full sm:w-auto">
-          Reset Filtro
+        <Button onClick={() => { setOrganizerFilter(""); handleClearDateFilter(); }} variant="outline" className="w-full sm:w-auto">
+          Reset Filtri
         </Button>
       </div>
 

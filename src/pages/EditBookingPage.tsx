@@ -7,7 +7,7 @@ import { ArrowLeft, CalendarIcon } from "lucide-react";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import *s z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -153,6 +153,10 @@ const EditBookingPage: React.FC = () => {
     }
   };
 
+  // Get today's date at midnight for disabling past dates
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   return (
     <div className="container mx-auto p-4">
       <Link to={`/rooms/${room.id}`} className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
@@ -222,9 +226,9 @@ const EditBookingPage: React.FC = () => {
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))} // Disable past dates
+                          disabled={(date) => date < today} // Disable dates before today (midnight)
                           initialFocus
-                          locale={it}
+                          locale={it} // Explicitly set locale
                         />
                       </PopoverContent>
                     </Popover>

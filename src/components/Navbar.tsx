@@ -10,6 +10,11 @@ const Navbar: React.FC = () => {
           Booking App
         </Link>
         <div className="space-x-4">
+          <Link to="/"> {/* Nuovo link Home */}
+            <Button variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/20">
+              Home
+            </Button>
+          </Link>
           <Link to="/rooms">
             <Button variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/20">
               Sale Riunioni

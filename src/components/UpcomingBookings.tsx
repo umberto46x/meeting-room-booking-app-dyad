@@ -8,6 +8,7 @@ import { Calendar, Clock, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils"; // Import cn utility
+import NoContentFound from "@/components/NoContentFound"; // Import the new component
 
 interface UpcomingBookingsProps {
   className?: string; // Add className prop
@@ -67,7 +68,11 @@ const UpcomingBookings: React.FC<UpcomingBookingsProps> = ({ className }) => {
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground text-center">Nessuna prenotazione in arrivo.</p>
+          <NoContentFound
+            message="Nessuna prenotazione in arrivo."
+            linkTo="/rooms"
+            linkText="Prenota una sala"
+          />
         )}
         <div className="mt-6 text-center">
           <Link to="/my-bookings">

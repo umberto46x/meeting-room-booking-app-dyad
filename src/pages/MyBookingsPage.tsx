@@ -13,6 +13,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
 import { it } from "date-fns/locale";
+import NoContentFound from "@/components/NoContentFound"; // Import the new component
 
 const MyBookingsPage: React.FC = () => {
   const [organizerFilter, setOrganizerFilter] = useState<string>("");
@@ -160,7 +161,12 @@ const MyBookingsPage: React.FC = () => {
             <BookingCard key={booking.id} booking={booking} onDelete={handleDeleteBooking} />
           ))
         ) : (
-          <p className="col-span-full text-center text-muted-foreground">Nessuna prenotazione trovata.</p>
+          <NoContentFound
+            message="Nessuna prenotazione trovata con i filtri attuali."
+            linkTo="/rooms"
+            linkText="Esplora le Sale Riunioni"
+            className="col-span-full"
+          />
         )}
       </div>
     </div>

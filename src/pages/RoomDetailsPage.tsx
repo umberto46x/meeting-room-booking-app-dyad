@@ -9,6 +9,7 @@ import { Booking } from "@/types";
 import RoomCalendar from "@/components/RoomCalendar";
 import { format, isSameDay } from "date-fns"; // Import isSameDay
 import { it } from "date-fns/locale";
+import NoContentFound from "@/components/NoContentFound"; // Import the new component
 
 const RoomDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -105,11 +106,15 @@ const RoomDetailsPage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <p className="text-muted-foreground">
-              {selectedCalendarDate
-                ? `Nessuna prenotazione per il ${format(selectedCalendarDate, "PPP", { locale: it })}.`
-                : "Nessuna prenotazione per questa stanza al momento."}
-            </p>
+            <NoContentFound
+              message={
+                selectedCalendarDate
+                  ? `Nessuna prenotazione per il ${format(selectedCalendarDate, "PPP", { locale: it })}.`
+                  : "Nessuna prenotazione per questa stanza al momento."
+              }
+              linkTo={`/rooms/${room.id}/book`}
+              linkText="Prenota ora"
+            />
           )}
         </CardContent>
       </Card>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { mockBookings, deleteBooking } from "@/data/mockData";
+import React, { useState, useEffect, useCallback } from "react";
+import { mockBookings, deleteBooking, subscribeToBookings } from "@/data/mockData";
 import { Booking } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ const MyBookingsPage: React.FC = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [filteredAndSortedBookings, setFilteredAndSortedBookings] = useState<Booking[]>([]);
 
-  useEffect(() => {
+  const applyFiltersAndSort = useCallback(() => {
     let currentBookings = [...mockBookings];
 
     // 1. Filter by organizer
@@ -64,13 +64,19 @@ const MyBookingsPage: React.FC = () => {
     });
 
     setFilteredAndSortedBookings(currentBookings);
-  }, [organizerFilter, sortBy, dateRange, mockBookings]);
+  }, [organizerFilter, sortBy, dateRange]);
+
+  useEffect(() => {
+    applyFiltersAndSort(); // Initial load and when filters/sort change
+    const unsubscribe = subscribeToBookings(applyFiltersAndSort); // Subscribe to global mockBookings changes
+    return () => unsubscribe(); // Cleanup subscription
+  }, [applyFiltersAndSort]);
 
   const handleDeleteBooking = (bookingId: string) => {
     try {
-      deleteBooking(bookingId);
-      setFilteredAndSortedBookings((prevBookings) => prevBookings.filter((booking) => booking.id !== bookingId));
+      deleteBooking(bookingId); // This will call notifyBookingsChange()
       showSuccess("Prenotazione eliminata con successo!");
+      // applyFiltersAndSort will be called by the subscription, updating the state
     } catch (error) {
       console.error("Errore durante l'eliminazione della prenotazione:", error);
       showError("Si è verificato un errore durante l'eliminazione della prenotazione.");

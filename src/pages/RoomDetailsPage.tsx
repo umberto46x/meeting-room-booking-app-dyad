@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { mockRooms, mockBookings, deleteBooking } from "@/data/mockData";
+import { mockRooms, mockBookings, deleteBooking, subscribeToBookings } from "@/data/mockData";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, MapPin, ArrowLeft } from "lucide-react";
@@ -14,15 +14,21 @@ const RoomDetailsPage: React.FC = () => {
 
   const [currentRoomBookings, setCurrentRoomBookings] = useState<Booking[]>([]);
 
-  useEffect(() => {
+  const updateRoomBookings = () => {
     if (id) {
       setCurrentRoomBookings(mockBookings.filter((booking) => booking.roomId === id));
     }
-  }, [id, mockBookings]);
+  };
+
+  useEffect(() => {
+    updateRoomBookings(); // Initial load
+    const unsubscribe = subscribeToBookings(updateRoomBookings); // Subscribe to changes
+    return () => unsubscribe(); // Cleanup subscription
+  }, [id]); // Only depends on id now
 
   const handleDeleteBooking = (bookingId: string) => {
-    deleteBooking(bookingId);
-    setCurrentRoomBookings((prevBookings) => prevBookings.filter((booking) => booking.id !== bookingId));
+    deleteBooking(bookingId); // This will also call notifyBookingsChange()
+    // The useEffect will then trigger updateRoomBookings, so no need for local filter here
   };
 
   if (!room) {

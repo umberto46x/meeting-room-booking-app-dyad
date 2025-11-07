@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { mockBookings } from "@/data/mockData";
+import React, { useEffect, useState, useCallback } from "react";
+import { mockBookings, subscribeToBookings } from "@/data/mockData";
 import { Booking } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { format } from "date-fns";
@@ -16,13 +16,19 @@ interface UpcomingBookingsProps {
 const UpcomingBookings: React.FC<UpcomingBookingsProps> = ({ className }) => {
   const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);
 
-  useEffect(() => {
+  const updateUpcomingBookings = useCallback(() => {
     const now = new Date();
     const filteredBookings = mockBookings
       .filter((booking) => booking.endTime > now) // Only show bookings that haven't ended yet
       .sort((a, b) => a.startTime.getTime() - b.startTime.getTime()); // Sort by start time ascending
     setUpcomingBookings(filteredBookings);
-  }, [mockBookings]); // Re-run effect if mockBookings changes
+  }, []); // No dependencies, as mockBookings is accessed directly
+
+  useEffect(() => {
+    updateUpcomingBookings(); // Initial load
+    const unsubscribe = subscribeToBookings(updateUpcomingBookings); // Subscribe to global mockBookings changes
+    return () => unsubscribe(); // Cleanup subscription
+  }, [updateUpcomingBookings]); // Depends on the memoized callback
 
   return (
     <Card className={cn("w-full max-w-2xl mx-auto mt-8", className)}> {/* Apply className here */}

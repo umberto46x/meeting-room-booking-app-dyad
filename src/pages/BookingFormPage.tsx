@@ -15,7 +15,8 @@ import { it } from "date-fns/locale";
 import { showSuccess, showError } from "@/utils/toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createBookingFormSchema } from "@/lib/bookingValidation";
-import { useBookings } from "@/context/BookingContext"; // Import useBookings
+import { useBookings } from "@/context/BookingContext";
+import BookedSlotsDisplay from "@/components/BookedSlotsDisplay"; // Import BookedSlotsDisplay
 
 interface BookingFormValues {
   title: string;
@@ -28,14 +29,14 @@ interface BookingFormValues {
 const BookingFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { rooms, bookings, addBooking } = useBookings(); // Use rooms, bookings, addBooking from context
+  const { rooms, bookings, addBooking } = useBookings();
 
   const room = rooms.find((r) => r.id === id);
   const roomId = id || '';
 
   const timeSlots = generateTimeSlots();
 
-  const bookingFormSchema = createBookingFormSchema(roomId, undefined, bookings); // Pass bookings for validation
+  const bookingFormSchema = createBookingFormSchema(roomId, undefined, bookings);
 
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
@@ -47,6 +48,8 @@ const BookingFormPage: React.FC = () => {
       endTime: "10:00",
     },
   });
+
+  const selectedDate = form.watch("date"); // Watch for changes in the selected date
 
   if (!room) {
     return (
@@ -172,6 +175,13 @@ const BookingFormPage: React.FC = () => {
                   </FormItem>
                 )}
               />
+              {selectedDate && (
+                <BookedSlotsDisplay
+                  roomId={roomId}
+                  selectedDate={selectedDate}
+                  allBookings={bookings}
+                />
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}

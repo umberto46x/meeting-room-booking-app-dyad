@@ -16,7 +16,8 @@ import { showSuccess, showError } from "@/utils/toast";
 import { Booking } from "@/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createBookingFormSchema } from "@/lib/bookingValidation";
-import { useBookings } from "@/context/BookingContext"; // Import useBookings
+import { useBookings } from "@/context/BookingContext";
+import BookedSlotsDisplay from "@/components/BookedSlotsDisplay"; // Import BookedSlotsDisplay
 
 interface BookingFormValues {
   title: string;
@@ -29,12 +30,12 @@ interface BookingFormValues {
 const EditBookingPage: React.FC = () => {
   const { roomId, bookingId } = useParams<{ roomId: string; bookingId: string }>();
   const navigate = useNavigate();
-  const { rooms, bookings, updateBooking } = useBookings(); // Use rooms, bookings, updateBooking from context
+  const { rooms, bookings, updateBooking } = useBookings();
 
   const room = rooms.find((r) => r.id === roomId);
   const bookingToEdit = bookings.find((b) => b.id === bookingId && b.roomId === roomId);
 
-  const bookingFormSchema = createBookingFormSchema(roomId || '', bookingId, bookings); // Pass bookings for validation
+  const bookingFormSchema = createBookingFormSchema(roomId || '', bookingId, bookings);
   const timeSlots = generateTimeSlots();
 
   const form = useForm<BookingFormValues>({
@@ -59,6 +60,8 @@ const EditBookingPage: React.FC = () => {
       });
     }
   }, [bookingToEdit, form]);
+
+  const selectedDate = form.watch("date"); // Watch for changes in the selected date
 
   if (!room || !bookingToEdit) {
     return (
@@ -183,6 +186,14 @@ const EditBookingPage: React.FC = () => {
                   </FormItem>
                 )}
               />
+              {selectedDate && (
+                <BookedSlotsDisplay
+                  roomId={roomId || ''}
+                  selectedDate={selectedDate}
+                  allBookings={bookings}
+                  currentBookingId={bookingId}
+                />
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}

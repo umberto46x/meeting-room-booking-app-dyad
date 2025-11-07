@@ -2,7 +2,7 @@ import React from "react";
 import { Booking } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, User, Trash2, Edit } from "lucide-react"; // Import Edit icon
+import { Calendar, Clock, User, Trash2, Edit } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import {
@@ -17,17 +17,19 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { showSuccess, showError } from "@/utils/toast";
-import { Link } from "react-router-dom"; // Import Link
+import { Link } from "react-router-dom";
+import { useBookings } from "@/context/BookingContext"; // Import useBookings
 
 interface BookingCardProps {
   booking: Booking;
-  onDelete: (bookingId: string) => void;
 }
 
-const BookingCard: React.FC<BookingCardProps> = ({ booking, onDelete }) => {
+const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
+  const { deleteBooking } = useBookings(); // Use deleteBooking from context
+
   const handleDelete = () => {
     try {
-      onDelete(booking.id);
+      deleteBooking(booking.id);
       showSuccess("Prenotazione eliminata con successo!");
     } catch (error) {
       console.error("Errore durante l'eliminazione della prenotazione:", error);

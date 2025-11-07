@@ -1,6 +1,5 @@
 import React from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { mockRooms, addBooking, mockBookings } from "@/data/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CalendarIcon } from "lucide-react";
@@ -15,7 +14,8 @@ import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { showSuccess, showError } from "@/utils/toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { createBookingFormSchema } from "@/lib/bookingValidation"; // Import the schema
+import { createBookingFormSchema } from "@/lib/bookingValidation";
+import { useBookings } from "@/context/BookingContext"; // Import useBookings
 
 interface BookingFormValues {
   title: string;
@@ -28,12 +28,14 @@ interface BookingFormValues {
 const BookingFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const room = mockRooms.find((r) => r.id === id);
+  const { rooms, bookings, addBooking } = useBookings(); // Use rooms, bookings, addBooking from context
+
+  const room = rooms.find((r) => r.id === id);
   const roomId = id || '';
 
   const timeSlots = generateTimeSlots();
 
-  const bookingFormSchema = createBookingFormSchema(roomId, undefined, mockBookings);
+  const bookingFormSchema = createBookingFormSchema(roomId, undefined, bookings); // Pass bookings for validation
 
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),

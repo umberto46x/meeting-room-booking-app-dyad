@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { mockBookings, deleteBooking, subscribeToBookings } from "@/data/mockData";
 import { Booking } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import BookingCard from "@/components/BookingCard";
 import { Search, CalendarIcon } from "lucide-react";
-import { showSuccess, showError } from "@/utils/toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -13,16 +11,18 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
 import { it } from "date-fns/locale";
-import NoContentFound from "@/components/NoContentFound"; // Import the new component
+import NoContentFound from "@/components/NoContentFound";
+import { useBookings } from "@/context/BookingContext"; // Import useBookings
 
 const MyBookingsPage: React.FC = () => {
+  const { bookings } = useBookings(); // Use bookings from context
   const [organizerFilter, setOrganizerFilter] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("dateAsc");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [filteredAndSortedBookings, setFilteredAndSortedBookings] = useState<Booking[]>([]);
 
   const applyFiltersAndSort = useCallback(() => {
-    let currentBookings = [...mockBookings];
+    let currentBookings = [...bookings]; // Use bookings from context
 
     // 1. Filter by organizer
     if (organizerFilter) {
@@ -56,33 +56,20 @@ const MyBookingsPage: React.FC = () => {
         return b.startTime.getTime() - a.startTime.getTime();
       }
       if (sortBy === "roomNameAsc") {
-        return a.title.localeCompare(b.title); // Using title as a proxy for room name
+        return a.title.localeCompare(b.title);
       }
       if (sortBy === "roomNameDesc") {
-        return b.title.localeCompare(a.title); // Using title as a proxy for room name
+        return b.title.localeCompare(a.title);
       }
       return 0;
     });
 
     setFilteredAndSortedBookings(currentBookings);
-  }, [organizerFilter, sortBy, dateRange]);
+  }, [bookings, organizerFilter, sortBy, dateRange]); // Add bookings to dependencies
 
   useEffect(() => {
-    applyFiltersAndSort(); // Initial load and when filters/sort change
-    const unsubscribe = subscribeToBookings(applyFiltersAndSort); // Subscribe to global mockBookings changes
-    return () => unsubscribe(); // Cleanup subscription
+    applyFiltersAndSort();
   }, [applyFiltersAndSort]);
-
-  const handleDeleteBooking = (bookingId: string) => {
-    try {
-      deleteBooking(bookingId); // This will call notifyBookingsChange()
-      showSuccess("Prenotazione eliminata con successo!");
-      // applyFiltersAndSort will be called by the subscription, updating the state
-    } catch (error) {
-      console.error("Errore durante l'eliminazione della prenotazione:", error);
-      showError("Si è verificato un errore durante l'eliminazione della prenotazione.");
-    }
-  };
 
   const handleClearDateFilter = () => {
     setDateRange(undefined);
@@ -158,7 +145,7 @@ const MyBookingsPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredAndSortedBookings.length > 0 ? (
           filteredAndSortedBookings.map((booking) => (
-            <BookingCard key={booking.id} booking={booking} onDelete={handleDeleteBooking} />
+            <BookingCard key={booking.id} booking={booking} />
           ))
         ) : (
           <NoContentFound

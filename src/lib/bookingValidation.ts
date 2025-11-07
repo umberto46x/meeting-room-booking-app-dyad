@@ -2,7 +2,7 @@ import * as z from "zod";
 import { format } from "date-fns";
 import { Booking } from "@/types";
 
-export const createBookingFormSchema = (roomId: string, currentBookingId: string | undefined, currentMockBookings: Booking[]) => z.object({
+export const createBookingFormSchema = (roomId: string, currentBookingId: string | undefined, currentBookings: Booking[]) => z.object({
   title: z.string().min(2, { message: "Il titolo deve contenere almeno 2 caratteri." }),
   organizer: z.string().min(2, { message: "Il nome dell'organizzatore deve contenere almeno 2 caratteri." }),
   date: z.date({ required_error: "Seleziona una data per la prenotazione." }),
@@ -32,7 +32,7 @@ export const createBookingFormSchema = (roomId: string, currentBookingId: string
     const [newEndHour, newEndMinute] = endTime.split(':').map(Number);
     newBookingEnd.setHours(newEndHour, newEndMinute, 0, 0);
 
-    const existingBookingsForRoomAndDate = currentMockBookings.filter(
+    const existingBookingsForRoomAndDate = currentBookings.filter(
       (booking) =>
         booking.roomId === roomId &&
         booking.id !== currentBookingId &&

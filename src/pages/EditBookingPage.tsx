@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { mockRooms, mockBookings, updateBooking } from "@/data/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CalendarIcon } from "lucide-react";
@@ -16,7 +15,8 @@ import { it } from "date-fns/locale";
 import { showSuccess, showError } from "@/utils/toast";
 import { Booking } from "@/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { createBookingFormSchema } from "@/lib/bookingValidation"; // Import the schema
+import { createBookingFormSchema } from "@/lib/bookingValidation";
+import { useBookings } from "@/context/BookingContext"; // Import useBookings
 
 interface BookingFormValues {
   title: string;
@@ -29,11 +29,12 @@ interface BookingFormValues {
 const EditBookingPage: React.FC = () => {
   const { roomId, bookingId } = useParams<{ roomId: string; bookingId: string }>();
   const navigate = useNavigate();
+  const { rooms, bookings, updateBooking } = useBookings(); // Use rooms, bookings, updateBooking from context
 
-  const room = mockRooms.find((r) => r.id === roomId);
-  const bookingToEdit = mockBookings.find((b) => b.id === bookingId && b.roomId === roomId);
+  const room = rooms.find((r) => r.id === roomId);
+  const bookingToEdit = bookings.find((b) => b.id === bookingId && b.roomId === roomId);
 
-  const bookingFormSchema = createBookingFormSchema(roomId || '', bookingId, mockBookings);
+  const bookingFormSchema = createBookingFormSchema(roomId || '', bookingId, bookings); // Pass bookings for validation
   const timeSlots = generateTimeSlots();
 
   const form = useForm<BookingFormValues>({

@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { mockBookings, subscribeToBookings } from "@/data/mockData";
 import { Booking } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { format } from "date-fns";
@@ -7,32 +6,32 @@ import { it } from "date-fns/locale";
 import { Calendar, Clock, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils"; // Import cn utility
-import NoContentFound from "@/components/NoContentFound"; // Import the new component
+import { cn } from "@/lib/utils";
+import NoContentFound from "@/components/NoContentFound";
+import { useBookings } from "@/context/BookingContext"; // Import useBookings
 
 interface UpcomingBookingsProps {
-  className?: string; // Add className prop
+  className?: string;
 }
 
 const UpcomingBookings: React.FC<UpcomingBookingsProps> = ({ className }) => {
+  const { bookings } = useBookings(); // Use bookings from context
   const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);
 
   const updateUpcomingBookings = useCallback(() => {
     const now = new Date();
-    const filteredBookings = mockBookings
-      .filter((booking) => booking.endTime > now) // Only show bookings that haven't ended yet
-      .sort((a, b) => a.startTime.getTime() - b.startTime.getTime()); // Sort by start time ascending
+    const filteredBookings = bookings
+      .filter((booking) => booking.endTime > now)
+      .sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
     setUpcomingBookings(filteredBookings);
-  }, []); // No dependencies, as mockBookings is accessed directly
+  }, [bookings]); // Depend on bookings from context
 
   useEffect(() => {
-    updateUpcomingBookings(); // Initial load
-    const unsubscribe = subscribeToBookings(updateUpcomingBookings); // Subscribe to global mockBookings changes
-    return () => unsubscribe(); // Cleanup subscription
-  }, [updateUpcomingBookings]); // Depends on the memoized callback
+    updateUpcomingBookings();
+  }, [updateUpcomingBookings]);
 
   return (
-    <Card className={cn("w-full max-w-2xl mx-auto mt-8", className)}> {/* Apply className here */}
+    <Card className={cn("w-full max-w-2xl mx-auto mt-8", className)}>
       <CardHeader>
         <CardTitle className="text-2xl">Prossime Prenotazioni</CardTitle>
         <CardDescription>Le tue prenotazioni in arrivo.</CardDescription>

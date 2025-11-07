@@ -1,39 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { mockRooms, mockBookings, deleteBooking, subscribeToBookings } from "@/data/mockData";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, MapPin, ArrowLeft, XCircle } from "lucide-react"; // Import XCircle for clear button
+import { Users, MapPin, ArrowLeft, XCircle } from "lucide-react";
 import BookingCard from "@/components/BookingCard";
 import { Booking } from "@/types";
 import RoomCalendar from "@/components/RoomCalendar";
-import { format, isSameDay } from "date-fns"; // Import isSameDay
+import { format, isSameDay } from "date-fns";
 import { it } from "date-fns/locale";
-import NoContentFound from "@/components/NoContentFound"; // Import the new component
+import NoContentFound from "@/components/NoContentFound";
+import { useBookings } from "@/context/BookingContext"; // Import useBookings
 
 const RoomDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const room = mockRooms.find((r) => r.id === id);
+  const { rooms, bookings } = useBookings(); // Use rooms and bookings from context
+
+  const room = rooms.find((r) => r.id === id);
 
   const [currentRoomBookings, setCurrentRoomBookings] = useState<Booking[]>([]);
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | undefined>(undefined);
 
-  const updateRoomBookings = () => {
-    if (id) {
-      setCurrentRoomBookings(mockBookings.filter((booking) => booking.roomId === id));
-    }
-  };
-
   useEffect(() => {
-    updateRoomBookings(); // Initial load
-    const unsubscribe = subscribeToBookings(updateRoomBookings); // Subscribe to changes
-    return () => unsubscribe(); // Cleanup subscription
-  }, [id]);
-
-  const handleDeleteBooking = (bookingId: string) => {
-    deleteBooking(bookingId); // This will also call notifyBookingsChange()
-    // The useEffect will then trigger updateRoomBookings, so no need for local filter here
-  };
+    if (id) {
+      setCurrentRoomBookings(bookings.filter((booking) => booking.roomId === id));
+    }
+  }, [id, bookings]); // Depend on bookings from context
 
   const handleClearDateSelection = () => {
     setSelectedCalendarDate(undefined);
@@ -102,7 +93,7 @@ const RoomDetailsPage: React.FC = () => {
           {bookingsToDisplay.length > 0 ? (
             <div className="space-y-4">
               {bookingsToDisplay.map((booking) => (
-                <BookingCard key={booking.id} booking={booking} onDelete={handleDeleteBooking} />
+                <BookingCard key={booking.id} booking={booking} />
               ))}
             </div>
           ) : (

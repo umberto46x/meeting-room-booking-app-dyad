@@ -31,7 +31,7 @@ export const mockRooms: Room[] = [
   },
 ];
 
-export let mockBookings: Booking[] = [
+export const mockBookings: Booking[] = [
   {
     id: "booking-1",
     roomId: "room-1",
@@ -65,42 +65,3 @@ export let mockBookings: Booking[] = [
     organizer: "Luca Neri",
   },
 ];
-
-// Mechanism to notify components about changes in mockBookings
-let bookingsVersion = 0;
-const listeners: (() => void)[] = [];
-
-export const subscribeToBookings = (callback: () => void) => {
-  listeners.push(callback);
-  return () => {
-    const index = listeners.indexOf(callback);
-    if (index > -1) {
-      listeners.splice(index, 1);
-    }
-  };
-};
-
-const notifyBookingsChange = () => {
-  bookingsVersion++; // Increment version to signal change
-  listeners.forEach(callback => callback());
-};
-
-export const addBooking = (newBooking: Booking) => {
-  mockBookings = [...mockBookings, newBooking];
-  console.log("Nuova prenotazione aggiunta:", newBooking);
-  notifyBookingsChange();
-};
-
-export const deleteBooking = (bookingId: string) => {
-  mockBookings = mockBookings.filter(booking => booking.id !== bookingId);
-  console.log("Prenotazione eliminata:", bookingId);
-  notifyBookingsChange();
-};
-
-export const updateBooking = (updatedBooking: Booking) => {
-  mockBookings = mockBookings.map(booking =>
-    booking.id === updatedBooking.id ? updatedBooking : booking
-  );
-  console.log("Prenotazione aggiornata:", updatedBooking);
-  notifyBookingsChange();
-};

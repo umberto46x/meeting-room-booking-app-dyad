@@ -4,7 +4,7 @@ import UpcomingBookings from "@/components/UpcomingBookings";
 
 const Index = () => {
   return (
-    <div className="flex flex-col items-center justify-center"> {/* Adjusted min-h and removed p-4 */}
+    <div className="flex flex-col items-center justify-center">
       <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-2xl w-full">
         <h1 className="text-4xl font-bold mb-4">Benvenuto nell'App di Prenotazione Sale Riunioni</h1>
         <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
@@ -17,7 +17,7 @@ const Index = () => {
           </Button>
         </Link>
       </div>
-      <UpcomingBookings />
+      <UpcomingBookings className="mt-8" />
     </div>
   );
 };

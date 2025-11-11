@@ -9,6 +9,7 @@ export interface Room {
 export interface Booking {
   id: string;
   roomId: string;
+  userId: string; // Added userId to link booking to the user
   title: string;
   startTime: Date;
   endTime: Date;

@@ -100,9 +100,11 @@ const EditBookingPage: React.FC = () => {
     fetchAllRoomBookings();
   }, [roomId, selectedDate]);
 
-  useEffect(() => {
-    form.setResolver(zodResolver(createBookingFormSchema(roomId || '', bookingId, allRoomBookingsForSelectedDate)));
-  }, [roomId, bookingId, allRoomBookingsForSelectedDate, form]);
+  // Rimosso: form.setResolver non è una funzione valida.
+  // Il resolver si aggiorna automaticamente quando allRoomBookingsForSelectedDate cambia.
+  // useEffect(() => {
+  //   form.setResolver(zodResolver(createBookingFormSchema(roomId || '', bookingId, allRoomBookingsForSelectedDate)));
+  // }, [roomId, bookingId, allRoomBookingsForSelectedDate, form]);
 
 
   if (!room || !bookingToEdit) {

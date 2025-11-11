@@ -19,6 +19,7 @@ import { createBookingFormSchema } from "@/lib/bookingValidation";
 import { useBookings } from "@/context/BookingContext";
 import BookedSlotsDisplay from "@/components/BookedSlotsDisplay";
 import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "@/context/ProfileContext"; // Import useProfile
 
 interface BookingFormValues {
   title: string;
@@ -32,6 +33,7 @@ const EditBookingPage: React.FC = () => {
   const { roomId, bookingId } = useParams<{ roomId: string; bookingId: string }>();
   const navigate = useNavigate();
   const { rooms, bookings, updateBooking } = useBookings();
+  const { profile, isLoadingProfile } = useProfile(); // Use profile context
 
   const room = rooms.find((r) => r.id === roomId);
   const bookingToEdit = bookings.find((b) => b.id === bookingId && b.roomId === roomId);
@@ -62,6 +64,15 @@ const EditBookingPage: React.FC = () => {
       });
     }
   }, [bookingToEdit, form]);
+
+  useEffect(() => {
+    if (profile && !isLoadingProfile && !bookingToEdit) { // Only pre-fill if it's a new booking or if organizer is empty
+      const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(" ");
+      if (fullName && !form.getValues("organizer")) {
+        form.setValue("organizer", fullName);
+      }
+    }
+  }, [profile, isLoadingProfile, form, bookingToEdit]);
 
   const selectedDate = form.watch("date");
 
@@ -100,11 +111,9 @@ const EditBookingPage: React.FC = () => {
     fetchAllRoomBookings();
   }, [roomId, selectedDate]);
 
-  // Rimosso: form.setResolver non è una funzione valida.
-  // Il resolver si aggiorna automaticamente quando allRoomBookingsForSelectedDate cambia.
-  // useEffect(() => {
-  //   form.setResolver(zodResolver(createBookingFormSchema(roomId || '', bookingId, allRoomBookingsForSelectedDate)));
-  // }, [roomId, bookingId, allRoomBookingsForSelectedDate, form]);
+  useEffect(() => {
+    form.setResolver(zodResolver(createBookingFormSchema(roomId || '', bookingId, allRoomBookingsForSelectedDate)));
+  }, [roomId, bookingId, allRoomBookingsForSelectedDate, form]);
 
 
   if (!room || !bookingToEdit) {
@@ -184,7 +193,7 @@ const EditBookingPage: React.FC = () => {
                   <FormItem>
                     <FormLabel>Organizzatore</FormLabel>
                     <FormControl>
-                      <Input placeholder="Il tuo nome" {...field} />
+                      <Input placeholder="Il tuo nome" {...field} disabled={isLoadingProfile} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

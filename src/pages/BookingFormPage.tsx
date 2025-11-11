@@ -19,6 +19,7 @@ import { useBookings } from "@/context/BookingContext";
 import BookedSlotsDisplay from "@/components/BookedSlotsDisplay";
 import { supabase } from "@/integrations/supabase/client";
 import { Booking } from "@/types";
+import { useProfile } from "@/context/ProfileContext"; // Import useProfile
 
 interface BookingFormValues {
   title: string;
@@ -32,6 +33,7 @@ const BookingFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { rooms, addBooking } = useBookings();
+  const { profile, isLoadingProfile } = useProfile(); // Use profile context
 
   const room = rooms.find((r) => r.id === id);
   const roomId = id || '';
@@ -52,6 +54,15 @@ const BookingFormPage: React.FC = () => {
   });
 
   const selectedDate = form.watch("date");
+
+  useEffect(() => {
+    if (profile && !isLoadingProfile) {
+      const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(" ");
+      if (fullName) {
+        form.setValue("organizer", fullName);
+      }
+    }
+  }, [profile, isLoadingProfile, form]);
 
   useEffect(() => {
     const fetchAllRoomBookings = async () => {
@@ -88,11 +99,9 @@ const BookingFormPage: React.FC = () => {
     fetchAllRoomBookings();
   }, [roomId, selectedDate]);
 
-  // Rimosso: form.setResolver non è una funzione valida.
-  // Il resolver si aggiorna automaticamente quando allRoomBookingsForSelectedDate cambia.
-  // useEffect(() => {
-  //   form.setResolver(zodResolver(createBookingFormSchema(roomId, undefined, allRoomBookingsForSelectedDate)));
-  // }, [roomId, allRoomBookingsForSelectedDate, form]);
+  useEffect(() => {
+    form.setResolver(zodResolver(createBookingFormSchema(roomId, undefined, allRoomBookingsForSelectedDate)));
+  }, [roomId, allRoomBookingsForSelectedDate, form]);
 
 
   if (!room) {
@@ -172,7 +181,7 @@ const BookingFormPage: React.FC = () => {
                   <FormItem>
                     <FormLabel>Organizzatore</FormLabel>
                     <FormControl>
-                      <Input placeholder="Il tuo nome" {...field} />
+                      <Input placeholder="Il tuo nome" {...field} disabled={isLoadingProfile} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

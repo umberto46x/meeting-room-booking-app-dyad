@@ -15,3 +15,11 @@ export interface Booking {
   endTime: Date;
   organizer: string;
 }
+
+export interface Profile {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  avatar_url: string | null;
+  updated_at: string | null;
+}

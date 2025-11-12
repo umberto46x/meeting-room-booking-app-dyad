@@ -20,7 +20,7 @@ import ProfilePage from "./pages/ProfilePage"; // Import ProfilePage
 const queryClient = new QueryClient();
 
 const App = () => (
-  <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+  <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme" attribute="class" enableSystem={true}>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Sonner />
